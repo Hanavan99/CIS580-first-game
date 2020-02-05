@@ -11,10 +11,9 @@ namespace CIS580_first_game
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         private List<Ball> balls = new List<Ball>();
-        private Texture2D playerStill;
-        private Texture2D playerMoving;
-        private int playerSpeed = 0;
-        private int playerX = 0;
+        private Player player;
+        private Random r = new Random();
+        private double lastMillis = 0;
 
         public Game1()
         {
@@ -28,29 +27,26 @@ namespace CIS580_first_game
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            Random r = new Random();
-            int x = 500;
-            for (int i = 0; i < 100; i++)
-            {
-                Ball b = new Ball(x, 200, (float) r.NextDouble() * 5f - 2.5f, (float)r.NextDouble() * 5f - 2.5f, new Color(r.Next() % 256, r.Next() % 256, r.Next() % 256));
-                balls.Add(b);
-                x += r.Next() % 500 + 100;
-            }
+
+            player = new Player(_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
 
             base.Initialize();
+        }
+        
+        private void AddBall()
+        {
+            Ball b = new Ball(r.Next() % (_graphics.PreferredBackBufferWidth - 50) + 25, 200, (float)r.NextDouble() * 5f - 2.5f, (float)r.NextDouble() * 5f - 2.5f, new Color(r.Next() % 128 + 128, r.Next() % 128 + 128, r.Next() % 128 + 128));
+            b.LoadContent(Content);
+            balls.Add(b);
         }
 
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            playerStill = Content.Load<Texture2D>("player_standing");
-            playerMoving = Content.Load<Texture2D>("player_moving");
             // TODO: use this.Content to load your game content here
-            foreach (Ball b in balls)
-            {
-                b.Initialize(Content);
-            }
+            AddBall();
+            player.LoadContent(Content);
         }
 
         protected override void Update(GameTime gameTime)
@@ -59,29 +55,24 @@ namespace CIS580_first_game
                 Exit();
 
             // TODO: Add your update logic here
-            foreach (Ball b in balls)
-            {
-                b.Update(gameTime, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
-                int centerX = (int) b.X + 25;
-                int centerY = (int) b.Y + 25;
-                if (CheckIntersectCircleRect(centerX, centerY, 25, 200, _graphics.PreferredBackBufferHeight - 100, 50, 100))
+                foreach (Ball b in balls.ToArray())
                 {
-                    playerX = 0;
+                    b.Update(gameTime, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
+                    if (player.bounds.CollidesWith(b.bounds))
+                    {
+                        // add code here for end of game
+                        balls.Clear();
+                        AddBall();
+                    }
                 }
+
+            if (gameTime.TotalGameTime.TotalMilliseconds - lastMillis > 10000)
+            {
+                AddBall();
+                lastMillis = gameTime.TotalGameTime.TotalMilliseconds;
             }
 
-            KeyboardState state = Keyboard.GetState();
-            if (state.IsKeyDown(Keys.D)) // moving left
-            {
-                playerSpeed = 5;
-            } else if (state.IsKeyDown(Keys.A))
-            {
-                playerSpeed = -5;
-            } else
-            {
-                playerSpeed = 0;
-            }
-            playerX += (int) (playerSpeed * gameTime.ElapsedGameTime.TotalMilliseconds * 0.1);
+            player.Update(gameTime, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
 
             base.Update(gameTime);
         }
@@ -91,34 +82,15 @@ namespace CIS580_first_game
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             // TODO: Add your drawing code here
-            foreach (Ball b in balls)
+            foreach (Ball b in balls.ToArray())
             {
-                b.Draw(_spriteBatch, -playerX);
+                b.Draw(_spriteBatch);
             }
 
-            if (playerSpeed == 0)
-            {
-                _spriteBatch.Begin();
-                _spriteBatch.Draw(playerStill, new Rectangle(200, _graphics.PreferredBackBufferHeight - 100, 50, 100), Color.Black);
-                _spriteBatch.End();
-            } else
-            {
-                _spriteBatch.Begin();
-                _spriteBatch.Draw(playerMoving, new Rectangle(200, _graphics.PreferredBackBufferHeight - 100, 50, 100), Color.Black);
-                _spriteBatch.End();
-            }
+            player.Draw(_spriteBatch);
 
             base.Draw(gameTime);
         }
 
-        private bool CheckIntersectCircleRect(float circleX, float circleY, float circleRadius, float rectX, float rectY, float rectWidth, float rectHeight)
-        {
-            // check if center of circle is inside of rect
-            if (circleX > rectX && circleX < rectX + rectWidth && circleY > rectY && circleY < rectY + rectHeight)
-            {
-                return true;
-            }
-            return false;
-        }
     }
 }
