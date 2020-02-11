@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -15,6 +16,7 @@ namespace CIS580_first_game
         private Texture2D ball;
         private int spriteSize = 50;
         private Color color;
+        private SoundEffect hit;
 
 
         public Ball(float x, float y, float velX, float velY, Color color)
@@ -30,6 +32,7 @@ namespace CIS580_first_game
         public void LoadContent(ContentManager content)
         {
             ball = content.Load<Texture2D>("ball");
+            hit = content.Load<SoundEffect>("impact");
         }
 
         public void Update(GameTime gameTime, int viewportWidth, int viewportHeight)
@@ -41,16 +44,19 @@ namespace CIS580_first_game
             {
                 velX = -velX;
                 bounds.X = bounds.Radius;
+                hit.Play();
             } else if (bounds.X > viewportWidth - bounds.Radius)
             {
                 velX = -velX;
                 bounds.X = viewportWidth - bounds.Radius;
+                hit.Play();
             }
 
             if (bounds.Y > viewportHeight - bounds.Radius) // if the ball is under the ground
             {
                 bounds.Y = viewportHeight - (bounds.Y - (viewportHeight - bounds.Radius)) - bounds.Radius;
                 velY = -velY;
+                hit.Play();
             }
 
             velY += (float) (0.005 * gameTime.ElapsedGameTime.TotalMilliseconds);
