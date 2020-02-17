@@ -1,4 +1,7 @@
-﻿using Microsoft.Xna.Framework;
+﻿using CIS580_first_game.Collisions;
+using CIS580_first_game.GameState;
+using CIS580_first_game.Model;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -8,7 +11,7 @@ using System.Text;
 
 namespace CIS580_first_game
 {
-    public class Player
+    public class Player : UpdateableObject<MyGameState>
     {
 
         public const int PlayerSpriteSize = 50;
@@ -30,7 +33,7 @@ namespace CIS580_first_game
             texture = content.Load<Texture2D>("santa");
         }
 
-        public void Update(GameTime gameTime, int width, int height)
+        public override void Update(GameTime gameTime, MyGameState gameState)
         {
             KeyboardState state = Keyboard.GetState();
             if (state.IsKeyDown(Keys.D)) // moving left
@@ -50,13 +53,13 @@ namespace CIS580_first_game
             {
                 bounds.X = 0;
             }
-            else if (bounds.X > width - 50)
+            else if (bounds.X > gameState.ViewportWidth - 50)
             {
-                bounds.X = width - 50;
+                bounds.X = gameState.ViewportWidth - 50;
             }
         }
 
-        public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
+        public override void Draw(GameTime gameTime, SpriteBatch spriteBatch, MyGameState gameState)
         {
             if (playerSpeed == 0)
             {

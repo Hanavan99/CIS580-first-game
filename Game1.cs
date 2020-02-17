@@ -1,4 +1,7 @@
-﻿using Microsoft.Xna.Framework;
+﻿using CIS580_first_game.Collisions;
+using CIS580_first_game.GameState;
+using CIS580_first_game.Model;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -9,16 +12,19 @@ namespace CIS580_first_game
 {
     public class Game1 : Game
     {
+        public static readonly Color[] BallColorList = new Color[] { Color.White, Color.DeepSkyBlue, Color.Red, Color.ForestGreen, Color.LightGoldenrodYellow };
 
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
-        private List<Ball> balls = new List<Ball>();
+        private List<UpdateableObject> objects = new List<UpdateableObject>();
         private Player player;
         private Random r = new Random();
         private double lastMillis = 0;
         private SpriteFont font;
         private SoundEffect levelUp;
-        private Color[] colorList = new Color[] { Color.White, Color.DeepSkyBlue, Color.Red, Color.ForestGreen, Color.LightGoldenrodYellow };
+        
+        private MyGameState gameState;
+        private BallModel ballModel;
 
         public Game1()
         {
@@ -34,6 +40,11 @@ namespace CIS580_first_game
             // TODO: Add your initialization logic here
 
             player = new Player(_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
+            objects.Add(player);
+
+            ballModel = new BallModel();
+
+            gameState = new MyGameState();
 
             base.Initialize();
         }
@@ -41,9 +52,8 @@ namespace CIS580_first_game
         private void AddBall()
         {
             //Ball b = new Ball(r.Next() % (_graphics.PreferredBackBufferWidth - 50) + 25, 200, (float)r.NextDouble() * 5f - 2.5f, (float)r.NextDouble() * 5f - 2.5f, new Color(r.Next() % 128 + 128, r.Next() % 128 + 128, r.Next() % 128 + 128));
-            Ball b = new Ball(r.Next() % (_graphics.PreferredBackBufferWidth - 50) + 25, 200, (float)r.NextDouble() * 5f - 2.5f, (float)r.NextDouble() * 5f - 2.5f, colorList[r.Next() % colorList.Length]);
-            b.LoadContent(Content);
-            balls.Add(b);
+            Ball b = new Ball(r.Next() % (_graphics.PreferredBackBufferWidth - 50) + 25, 200, (float)r.NextDouble() * 5f - 2.5f, (float)r.NextDouble() * 5f - 2.5f, BallColorList[r.Next() % BallColorList.Length], ballModel);
+            objects.Add(b);
         }
 
         protected override void LoadContent()
@@ -53,6 +63,7 @@ namespace CIS580_first_game
             // TODO: use this.Content to load your game content here
             AddBall();
             player.LoadContent(Content);
+            ballModel.LoadContent(Content);
             font = Content.Load<SpriteFont>("default_font");
             levelUp = Content.Load<SoundEffect>("level_up");
         }
@@ -63,13 +74,17 @@ namespace CIS580_first_game
                 Exit();
 
             // TODO: Add your update logic here
-                foreach (Ball b in balls.ToArray())
+            gameState.ViewportHeight = _graphics.PreferredBackBufferHeight;
+            gameState.ViewportWidth = _graphics.PreferredBackBufferWidth;
+
+            foreach (UpdateableObject o in objects.ToArray())
                 {
-                    b.Update(gameTime, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
-                    if (player.bounds.CollidesWith(b.bounds))
+                    o.Update(gameTime, gameState);
+                    if (o.GetType().Equals(typeof(Ball)) && player.bounds.CollidesWith(((Ball)o).bounds))
                     {
                         // add code here for end of game
-                        balls.Clear();
+                        objects.Clear();
+                        objects.Add(player);
                         AddBall();
                         lastMillis = gameTime.TotalGameTime.TotalMilliseconds;
                     }
@@ -82,8 +97,6 @@ namespace CIS580_first_game
                 levelUp.Play();
             }
 
-            player.Update(gameTime, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
-
             base.Update(gameTime);
         }
 
@@ -92,16 +105,14 @@ namespace CIS580_first_game
             GraphicsDevice.Clear(Color.AntiqueWhite);
 
             // TODO: Add your drawing code here
-            foreach (Ball b in balls.ToArray())
+            foreach (UpdateableObject o in objects.ToArray())
             {
-                b.Draw(_spriteBatch);
+                o.Draw(gameTime, _spriteBatch, gameState);
             }
-
-            player.Draw(_spriteBatch, gameTime);
 
             // draw string
             _spriteBatch.Begin();
-            _spriteBatch.DrawString(font, "Current Level: " + balls.Count, new Vector2(20, 20), Color.Black);
+            _spriteBatch.DrawString(font, "Current Level: " + (objects.Count - 1), new Vector2(20, 20), Color.Black);
             _spriteBatch.End();
 
             base.Draw(gameTime);

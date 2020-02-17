@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CIS580_first_game
+namespace CIS580_first_game.Collisions
 {
     public struct BoundingCircle
     {
