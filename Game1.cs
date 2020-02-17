@@ -51,7 +51,6 @@ namespace CIS580_first_game
         
         private void AddBall()
         {
-            //Ball b = new Ball(r.Next() % (_graphics.PreferredBackBufferWidth - 50) + 25, 200, (float)r.NextDouble() * 5f - 2.5f, (float)r.NextDouble() * 5f - 2.5f, new Color(r.Next() % 128 + 128, r.Next() % 128 + 128, r.Next() % 128 + 128));
             Ball b = new Ball(r.Next() % (_graphics.PreferredBackBufferWidth - 50) + 25, 200, (float)r.NextDouble() * 5f - 2.5f, (float)r.NextDouble() * 5f - 2.5f, BallColorList[r.Next() % BallColorList.Length], ballModel);
             objects.Add(b);
         }
@@ -77,19 +76,20 @@ namespace CIS580_first_game
             gameState.ViewportHeight = _graphics.PreferredBackBufferHeight;
             gameState.ViewportWidth = _graphics.PreferredBackBufferWidth;
 
+            // handle updating of all updateable objects
             foreach (UpdateableObject o in objects.ToArray())
+            {
+                o.Update(gameTime, gameState);
+                if (o.GetType().Equals(typeof(Ball)) && player.bounds.CollidesWith(((Ball)o).bounds))
                 {
-                    o.Update(gameTime, gameState);
-                    if (o.GetType().Equals(typeof(Ball)) && player.bounds.CollidesWith(((Ball)o).bounds))
-                    {
-                        // add code here for end of game
-                        objects.Clear();
-                        objects.Add(player);
-                        AddBall();
-                        lastMillis = gameTime.TotalGameTime.TotalMilliseconds;
-                    }
+                    objects.Clear();
+                    objects.Add(player);
+                    AddBall();
+                    lastMillis = gameTime.TotalGameTime.TotalMilliseconds;
                 }
+            }
 
+            // end of game checks
             if (gameTime.TotalGameTime.TotalMilliseconds - lastMillis > 10000)
             {
                 AddBall();
@@ -104,7 +104,7 @@ namespace CIS580_first_game
         {
             GraphicsDevice.Clear(Color.AntiqueWhite);
 
-            // TODO: Add your drawing code here
+            // draw all updateable objects
             foreach (UpdateableObject o in objects.ToArray())
             {
                 o.Draw(gameTime, _spriteBatch, gameState);
