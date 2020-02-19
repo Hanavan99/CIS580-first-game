@@ -17,7 +17,9 @@ namespace CIS580_first_game
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         private List<UpdateableObject> objects = new List<UpdateableObject>();
+        private World world;
         private Player player;
+        private int ballCount = 0;
         private Random r = new Random();
         private double lastMillis = 0;
         private SpriteFont font;
@@ -25,6 +27,9 @@ namespace CIS580_first_game
         
         private MyGameState gameState;
         private BallModel ballModel;
+        private TerrainModel terrainModel;
+
+        public const int WorldSize = 1000;
 
         public Game1()
         {
@@ -42,17 +47,30 @@ namespace CIS580_first_game
             player = new Player(_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
             objects.Add(player);
 
+            world = new World();
+
             ballModel = new BallModel();
 
             gameState = new MyGameState();
+            gameState.CameraMatrix = Matrix.CreateTranslation((_graphics.PreferredBackBufferWidth / 2) - (Player.PlayerSpriteSize / 2), 0, 0);
+            gameState.WorldSize = WorldSize;
+
+            terrainModel = new TerrainModel();
+            for (int i = -20; i < 20; i++)
+            {
+                TerrainTile t = new TerrainTile(terrainModel, i, r.Next() % 4, _graphics.PreferredBackBufferHeight);
+                objects.Add(t);
+            }
 
             base.Initialize();
         }
         
         private void AddBall()
         {
-            Ball b = new Ball(r.Next() % (_graphics.PreferredBackBufferWidth - 50) + 25, 200, (float)r.NextDouble() * 5f - 2.5f, (float)r.NextDouble() * 5f - 2.5f, BallColorList[r.Next() % BallColorList.Length], ballModel);
+            Ball b = new Ball(r.Next() % (2 * WorldSize - 50) + 25 - WorldSize, 200, (float)r.NextDouble() * 5f - 2.5f, (float)r.NextDouble() * 5f - 2.5f, BallColorList[r.Next() % BallColorList.Length], ballModel);
             objects.Add(b);
+            world.AddBall(b);
+            ballCount++;
         }
 
         protected override void LoadContent()
@@ -63,6 +81,7 @@ namespace CIS580_first_game
             AddBall();
             player.LoadContent(Content);
             ballModel.LoadContent(Content);
+            terrainModel.LoadContent(Content);
             font = Content.Load<SpriteFont>("default_font");
             levelUp = Content.Load<SoundEffect>("level_up");
         }
@@ -82,12 +101,17 @@ namespace CIS580_first_game
                 o.Update(gameTime, gameState);
                 if (o.GetType().Equals(typeof(Ball)) && player.bounds.CollidesWith(((Ball)o).bounds))
                 {
-                    objects.Clear();
-                    objects.Add(player);
+                    objects.RemoveAll((o) =>
+                    {
+                        return o.GetType().Equals(typeof(Ball));
+                    });
+                    world.Clear();
+                    ballCount = 0;
                     AddBall();
                     lastMillis = gameTime.TotalGameTime.TotalMilliseconds;
                 }
             }
+            world.Update(gameTime, gameState);
 
             // end of game checks
             if (gameTime.TotalGameTime.TotalMilliseconds - lastMillis > 10000)
@@ -112,7 +136,9 @@ namespace CIS580_first_game
 
             // draw string
             _spriteBatch.Begin();
-            _spriteBatch.DrawString(font, "Current Level: " + (objects.Count - 1), new Vector2(20, 20), Color.Black);
+            _spriteBatch.DrawString(font, "Current Level: " + ballCount, new Vector2(20, 20), Color.Black);
+            _spriteBatch.DrawString(font, "Level up in: " + (int) ((lastMillis + 10000 - gameTime.TotalGameTime.TotalMilliseconds) / 1000.0 + 1), new Vector2(20, 40), Color.Black);
+            //_spriteBatch.DrawString(font, "Player X: " + player.bounds.X + "; Ball X: " + ((Ball)objects[objects.Count - 1]).bounds.X, new Vector2(20, 40), Color.Black);
             _spriteBatch.End();
 
             base.Draw(gameTime);

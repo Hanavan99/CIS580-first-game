@@ -23,7 +23,7 @@ namespace CIS580_first_game
         public Player(int viewportWidth, int viewportHeight)
         {
             bounds.X = 0;
-            bounds.Y = viewportHeight - 50;
+            bounds.Y = viewportHeight - PlayerSpriteSize - TerrainModel.TerrainHeight;
             bounds.Width = 50;
             bounds.Height = 50;
         }
@@ -48,14 +48,18 @@ namespace CIS580_first_game
             {
                 playerSpeed = 0;
             }
+            Vector3 t = gameState.CameraMatrix.Translation; 
+            
             bounds.X += (int)(playerSpeed * gameTime.ElapsedGameTime.TotalMilliseconds * 0.1);
-            if (bounds.X < 0)
+            if (bounds.X < -gameState.WorldSize)
             {
-                bounds.X = 0;
+                bounds.X = -gameState.WorldSize;
             }
-            else if (bounds.X > gameState.ViewportWidth - 50)
+            else if (bounds.X > gameState.WorldSize - PlayerSpriteSize)
             {
-                bounds.X = gameState.ViewportWidth - 50;
+                bounds.X = gameState.WorldSize - PlayerSpriteSize;
+            } else {
+                gameState.CameraMatrix = Matrix.CreateTranslation(t.X - (float)(playerSpeed * gameTime.ElapsedGameTime.TotalMilliseconds * 0.1f), 0, 0);
             }
         }
 
@@ -64,14 +68,14 @@ namespace CIS580_first_game
             if (playerSpeed == 0)
             {
                 spriteBatch.Begin();
-                spriteBatch.Draw(texture, bounds, new Rectangle(0, 0, PlayerSpriteSize, PlayerSpriteSize), Color.White);
+                spriteBatch.Draw(texture, new BoundingRectangle(gameState.ViewportWidth / 2 - PlayerSpriteSize / 2, bounds.Y, bounds.Width, bounds.Height), new Rectangle(0, 0, PlayerSpriteSize, PlayerSpriteSize), Color.White);
                 spriteBatch.End();
             }
             else
             {
                 int spriteIndex = (int)(gameTime.TotalGameTime.TotalSeconds * 12) % 6;
                 spriteBatch.Begin();
-                spriteBatch.Draw(texture, bounds, new Rectangle(playerSpeed < 0 ? (spriteIndex + 1) * PlayerSpriteSize : spriteIndex * PlayerSpriteSize, 0, playerSpeed < 0 ? -PlayerSpriteSize : PlayerSpriteSize, PlayerSpriteSize), Color.White);
+                spriteBatch.Draw(texture, new BoundingRectangle(gameState.ViewportWidth / 2 - PlayerSpriteSize / 2, bounds.Y, bounds.Width, bounds.Height), new Rectangle(playerSpeed < 0 ? (spriteIndex + 1) * PlayerSpriteSize : spriteIndex * PlayerSpriteSize, 0, playerSpeed < 0 ? -PlayerSpriteSize : PlayerSpriteSize, PlayerSpriteSize), Color.White);
                 spriteBatch.End();
             }
         }

@@ -12,7 +12,7 @@ namespace CIS580_first_game.Model
 {
     public class Ball : UpdateableObject<MyGameState>
     {
-        public BallModel model;
+        public BallModel model; // allows for the Flyweight pattern
         public BoundingCircle bounds;
         public float velX;
         public float velY;
@@ -37,21 +37,21 @@ namespace CIS580_first_game.Model
             bounds.X += velX;
             bounds.Y += velY;
 
-            if (bounds.X < bounds.Radius)
+            if (bounds.X < -gameState.WorldSize + bounds.Radius)
             {
                 velX = -velX;
-                bounds.X = bounds.Radius;
+                bounds.X = -gameState.WorldSize + bounds.Radius;
                 model.BounceSound.Play();
-            } else if (bounds.X > gameState.ViewportWidth - bounds.Radius)
+            } else if (bounds.X > gameState.WorldSize - bounds.Radius)
             {
                 velX = -velX;
-                bounds.X = gameState.ViewportWidth - bounds.Radius;
+                bounds.X = gameState.WorldSize - bounds.Radius;
                 model.BounceSound.Play();
             }
 
-            if (bounds.Y > gameState.ViewportHeight - bounds.Radius) // if the ball is under the ground
+            if (bounds.Y > gameState.ViewportHeight - bounds.Radius - TerrainModel.TerrainHeight) // if the ball is under the ground
             {
-                bounds.Y = gameState.ViewportHeight - (bounds.Y - (gameState.ViewportHeight - bounds.Radius)) - bounds.Radius;
+                bounds.Y = gameState.ViewportHeight - (bounds.Y - (gameState.ViewportHeight - bounds.Radius - TerrainModel.TerrainHeight)) - bounds.Radius - TerrainModel.TerrainHeight;
                 velY = -velY;
                 model.BounceSound.Play();
             }
@@ -61,7 +61,7 @@ namespace CIS580_first_game.Model
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch, MyGameState gameState)
         {
-            spriteBatch.Begin();
+            spriteBatch.Begin(transformMatrix: gameState.CameraMatrix);
             spriteBatch.Draw(model.Texture, bounds, color);
             spriteBatch.End();
         }
