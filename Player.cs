@@ -18,6 +18,7 @@ namespace CIS580_first_game
 
         public BoundingRectangle bounds;
         public float playerSpeed;
+        public bool isFacingLeft; // player state representing the last direction of travel
         private Texture2D texture;
 
         public Player(int viewportWidth, int viewportHeight)
@@ -36,13 +37,15 @@ namespace CIS580_first_game
         public override void Update(GameTime gameTime, MyGameState gameState)
         {
             KeyboardState state = Keyboard.GetState();
-            if (state.IsKeyDown(Keys.D)) // moving left
+            if (state.IsKeyDown(Keys.D)) // moving right
             {
                 playerSpeed = 5;
+                isFacingLeft = true;
             }
-            else if (state.IsKeyDown(Keys.A)) // moving right
+            else if (state.IsKeyDown(Keys.A)) // moving left
             {
                 playerSpeed = -5;
+                isFacingLeft = false;
             }
             else
             {
@@ -68,16 +71,21 @@ namespace CIS580_first_game
             if (playerSpeed == 0)
             {
                 spriteBatch.Begin();
-                spriteBatch.Draw(texture, new BoundingRectangle(gameState.ViewportWidth / 2 - PlayerSpriteSize / 2, bounds.Y, bounds.Width, bounds.Height), new Rectangle(0, 0, PlayerSpriteSize, PlayerSpriteSize), Color.White);
+                spriteBatch.Draw(texture, new BoundingRectangle(gameState.ViewportWidth / 2 - PlayerSpriteSize / 2, bounds.Y, bounds.Width, bounds.Height), GetPlayerSpriteRect(0), Color.White);
                 spriteBatch.End();
             }
             else
             {
                 int spriteIndex = (int)(gameTime.TotalGameTime.TotalSeconds * 12) % 6;
                 spriteBatch.Begin();
-                spriteBatch.Draw(texture, new BoundingRectangle(gameState.ViewportWidth / 2 - PlayerSpriteSize / 2, bounds.Y, bounds.Width, bounds.Height), new Rectangle(playerSpeed < 0 ? (spriteIndex + 1) * PlayerSpriteSize : spriteIndex * PlayerSpriteSize, 0, playerSpeed < 0 ? -PlayerSpriteSize : PlayerSpriteSize, PlayerSpriteSize), Color.White);
+                spriteBatch.Draw(texture, new BoundingRectangle(gameState.ViewportWidth / 2 - PlayerSpriteSize / 2, bounds.Y, bounds.Width, bounds.Height), GetPlayerSpriteRect(spriteIndex), Color.White);
                 spriteBatch.End();
             }
+        }
+
+        private Rectangle GetPlayerSpriteRect(int spriteIndex)
+        {
+            return new Rectangle(isFacingLeft ? (spriteIndex + 1) * PlayerSpriteSize : spriteIndex * PlayerSpriteSize, 0, isFacingLeft ? -PlayerSpriteSize : PlayerSpriteSize, PlayerSpriteSize);
         }
 
     }

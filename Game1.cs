@@ -12,7 +12,7 @@ namespace CIS580_first_game
 {
     public class Game1 : Game
     {
-        public static readonly Color[] BallColorList = new Color[] { Color.White, Color.DeepSkyBlue, Color.Red, Color.ForestGreen, Color.LightGoldenrodYellow };
+        public static readonly Color[] BallColorList = new Color[] { Color.White, Color.DeepSkyBlue, Color.Red, Color.LightGreen, Color.LightGoldenrodYellow, Color.HotPink };
 
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
