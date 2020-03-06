@@ -13,7 +13,6 @@ namespace CIS580_first_game
 {
     public class Game1 : Game
     {
-        //public static readonly Color[] BallColorList = new Color[] { Color.White, Color.DeepSkyBlue, Color.Red, Color.LightGreen, Color.LightGoldenrodYellow, Color.HotPink };
 
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
@@ -80,13 +79,14 @@ namespace CIS580_first_game
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TODO: use this.Content to load your game content here
-            AddBall();
+            
             player.LoadContent(Content);
             ballModel.LoadContent(Content);
             terrainModel.LoadContent(Content);
             font = Content.Load<SpriteFont>("default_font");
             levelUp = Content.Load<SoundEffect>("level_up");
             ballColors = Content.Load<BallColorContent>("ballcolors");
+            AddBall();
         }
 
         protected override void Update(GameTime gameTime)

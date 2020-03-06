@@ -3,14 +3,14 @@
 
 /outputDir:bin/$(Platform)
 /intermediateDir:obj/$(Platform)
-/platform:Windows
+/platform:DesktopGL
 /config:
 /profile:Reach
 /compress:False
 
 #-------------------------------- References --------------------------------#
 
-/reference:..\..\CIS580-content-project\bin\Release\netcoreapp3.0\CIS580-content-project.dll
+/reference:..\..\CIS580-content-project\bin\Debug\CIS580-content-project.dll
 
 #---------------------------------- Content ---------------------------------#
 
@@ -27,8 +27,8 @@
 /build:ball.png
 
 #begin ballcolors.colorlist
-/importer:
-/processor:
+/importer:BallColorsetImporter
+/processor:BallColorsetProcessor
 /build:ballcolors.colorlist
 
 #begin default_font.spritefont
