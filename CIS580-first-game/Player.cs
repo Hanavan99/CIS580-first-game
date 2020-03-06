@@ -40,12 +40,12 @@ namespace CIS580_first_game
             if (state.IsKeyDown(Keys.D)) // moving right
             {
                 playerSpeed = 5;
-                isFacingLeft = true;
+                isFacingLeft = false;
             }
             else if (state.IsKeyDown(Keys.A)) // moving left
             {
                 playerSpeed = -5;
-                isFacingLeft = false;
+                isFacingLeft = true;
             }
             else
             {

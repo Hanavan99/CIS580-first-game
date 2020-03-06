@@ -10,6 +10,7 @@
 
 #-------------------------------- References --------------------------------#
 
+/reference:..\..\CIS580-content-project\bin\Release\netcoreapp3.0\CIS580-content-project.dll
 
 #---------------------------------- Content ---------------------------------#
 
@@ -24,6 +25,11 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:ball.png
+
+#begin ballcolors.colorlist
+/importer:
+/processor:
+/build:ballcolors.colorlist
 
 #begin default_font.spritefont
 /importer:FontDescriptionImporter

@@ -1,4 +1,5 @@
-﻿using CIS580_first_game.Collisions;
+﻿using CIS580_content_project;
+using CIS580_first_game.Collisions;
 using CIS580_first_game.GameState;
 using CIS580_first_game.Model;
 using Microsoft.Xna.Framework;
@@ -12,7 +13,7 @@ namespace CIS580_first_game
 {
     public class Game1 : Game
     {
-        public static readonly Color[] BallColorList = new Color[] { Color.White, Color.DeepSkyBlue, Color.Red, Color.LightGreen, Color.LightGoldenrodYellow, Color.HotPink };
+        //public static readonly Color[] BallColorList = new Color[] { Color.White, Color.DeepSkyBlue, Color.Red, Color.LightGreen, Color.LightGoldenrodYellow, Color.HotPink };
 
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
@@ -28,6 +29,7 @@ namespace CIS580_first_game
         private MyGameState gameState;
         private BallModel ballModel;
         private TerrainModel terrainModel;
+        private BallColorContent ballColors;
 
         public const int WorldSize = 1000;
 
@@ -67,7 +69,7 @@ namespace CIS580_first_game
         
         private void AddBall()
         {
-            Ball b = new Ball(r.Next() % (2 * WorldSize - 50) + 25 - WorldSize, 200, (float)r.NextDouble() * 5f - 2.5f, (float)r.NextDouble() * 5f - 2.5f, BallColorList[r.Next() % BallColorList.Length], ballModel);
+            Ball b = new Ball(r.Next() % (2 * WorldSize - 50) + 25 - WorldSize, 200, (float)r.NextDouble() * 5f - 2.5f, (float)r.NextDouble() * 5f - 2.5f, ballColors.ColorList[r.Next() % ballColors.ColorList.Count], ballModel);
             objects.Add(b);
             world.AddBall(b);
             ballCount++;
@@ -84,6 +86,7 @@ namespace CIS580_first_game
             terrainModel.LoadContent(Content);
             font = Content.Load<SpriteFont>("default_font");
             levelUp = Content.Load<SoundEffect>("level_up");
+            ballColors = Content.Load<BallColorContent>("ballcolors");
         }
 
         protected override void Update(GameTime gameTime)

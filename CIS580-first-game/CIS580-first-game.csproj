@@ -26,5 +26,9 @@
     <MonoGameContentReference Include="Content\Content.mgcb" Visible="false" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\CIS580-content-project\CIS580-content-project.csproj" />
+  </ItemGroup>
+
 </Project>
 
