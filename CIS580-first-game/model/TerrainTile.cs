@@ -14,10 +14,10 @@ namespace CIS580_first_game.Model
         private Rectangle bounds;
         private Rectangle srcBounds;
 
-        public TerrainTile(TerrainModel model, int x, int type, int viewportHeight)
+        public TerrainTile(TerrainModel model, int x, int type)
         {
             this.model = model;
-            bounds = new Rectangle(x * TerrainModel.TerrainWidth, viewportHeight - TerrainModel.TerrainWidth, TerrainModel.TerrainWidth, TerrainModel.TerrainWidth);
+            bounds = new Rectangle(x * TerrainModel.TerrainWidth, 0, TerrainModel.TerrainWidth, TerrainModel.TerrainWidth);
             srcBounds = new Rectangle(type * TerrainModel.TerrainWidth, 0, TerrainModel.TerrainWidth, TerrainModel.TerrainWidth);
         }
 
@@ -30,7 +30,7 @@ namespace CIS580_first_game.Model
 
         public override void Update(GameTime gameTime, MyGameState gameState)
         {
-            // do nothing
+            bounds.Y = gameState.ViewportHeight - TerrainModel.TerrainWidth;
         }
     }
 }

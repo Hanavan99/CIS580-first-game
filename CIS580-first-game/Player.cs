@@ -21,10 +21,9 @@ namespace CIS580_first_game
         public bool isFacingLeft; // player state representing the last direction of travel
         private Texture2D texture;
 
-        public Player(int viewportWidth, int viewportHeight)
+        public Player()
         {
             bounds.X = 0;
-            bounds.Y = viewportHeight - PlayerSpriteSize - TerrainModel.TerrainHeight;
             bounds.Width = 50;
             bounds.Height = 50;
         }
@@ -64,6 +63,8 @@ namespace CIS580_first_game
             } else {
                 gameState.CameraMatrix = Matrix.CreateTranslation(t.X - (float)(playerSpeed * gameTime.ElapsedGameTime.TotalMilliseconds * 0.1f), 0, 0);
             }
+
+            bounds.Y = gameState.ViewportHeight - PlayerSpriteSize - TerrainModel.TerrainHeight;
         }
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch, MyGameState gameState)

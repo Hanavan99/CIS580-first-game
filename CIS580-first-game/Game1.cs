@@ -2,6 +2,7 @@
 using CIS580_first_game.Collisions;
 using CIS580_first_game.GameState;
 using CIS580_first_game.Model;
+using CIS580_first_game.particle;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
@@ -24,6 +25,7 @@ namespace CIS580_first_game
         private double lastMillis = 0;
         private SpriteFont font;
         private SoundEffect levelUp;
+        private ParticleSystem rainParticles;
         
         private MyGameState gameState;
         private BallModel ballModel;
@@ -35,17 +37,18 @@ namespace CIS580_first_game
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
+            //Window.AllowUserResizing = true;
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
-            _graphics.PreferredBackBufferWidth = 800;
-            _graphics.PreferredBackBufferHeight = 600;
+            _graphics.PreferredBackBufferWidth = 1000;
+            _graphics.PreferredBackBufferHeight = 800;
         }
 
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
 
-            player = new Player(_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
+            player = new Player();
             objects.Add(player);
 
             world = new World();
@@ -57,9 +60,10 @@ namespace CIS580_first_game
             gameState.WorldSize = WorldSize;
 
             terrainModel = new TerrainModel();
+            
             for (int i = -20; i < 20; i++)
             {
-                TerrainTile t = new TerrainTile(terrainModel, i, r.Next() % 4, _graphics.PreferredBackBufferHeight);
+                TerrainTile t = new TerrainTile(terrainModel, i, r.Next() % 4);
                 objects.Add(t);
             }
 
@@ -68,7 +72,7 @@ namespace CIS580_first_game
         
         private void AddBall()
         {
-            Ball b = new Ball(r.Next() % (2 * WorldSize - 50) + 25 - WorldSize, 200, (float)r.NextDouble() * 5f - 2.5f, (float)r.NextDouble() * 5f - 2.5f, ballColors.ColorList[r.Next() % ballColors.ColorList.Count], ballModel);
+            Ball b = new Ball(r.Next() % (2 * WorldSize - 50) + 25 - WorldSize, 200, (float)r.NextDouble() * 5f - 2.5f, (float)r.NextDouble() * 5f - 2.5f, ballColors.ColorList[r.Next() % ballColors.ColorList.Count], ballModel, _graphics.GraphicsDevice);
             objects.Add(b);
             world.AddBall(b);
             ballCount++;
@@ -86,11 +90,27 @@ namespace CIS580_first_game
             font = Content.Load<SpriteFont>("default_font");
             levelUp = Content.Load<SoundEffect>("level_up");
             ballColors = Content.Load<BallColorContent>("ballcolors");
+            rainParticles = new ParticleSystem(_graphics.GraphicsDevice, 500, ballModel.ImpactTexture);
+            rainParticles.BlendState = BlendState.Opaque;
+            rainParticles.SpawnPerFrame = 5;
+            rainParticles.SpawnParticle = (ref Particle p, Random r) =>
+            {
+                p.acceleration = Vector2.Zero;
+                p.color = Color.CornflowerBlue;
+                p.life = 1f;
+                p.scale = 1;
+                p.velocity = new Vector2(0, 1000);
+                p.position = new Vector2((float)(r.NextDouble() * 2.0f - 1.0f) * WorldSize, 0);
+            };
+            rainParticles.UpdateParticle = ParticleSystem.DefaultParticleUpdater;
             AddBall();
         }
 
         protected override void Update(GameTime gameTime)
         {
+            gameState.ViewportHeight = _graphics.PreferredBackBufferHeight;
+            gameState.ViewportWidth = _graphics.PreferredBackBufferWidth;
+
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
@@ -124,12 +144,16 @@ namespace CIS580_first_game
                 levelUp.Play();
             }
 
+            rainParticles.Update(gameTime);
+
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.AntiqueWhite);
+            GraphicsDevice.Clear(new Color(50, 40, 40));
+
+            rainParticles.Draw(gameState.CameraMatrix);
 
             // draw all updateable objects
             foreach (UpdateableObject o in objects.ToArray())
@@ -139,10 +163,12 @@ namespace CIS580_first_game
 
             // draw string
             _spriteBatch.Begin();
-            _spriteBatch.DrawString(font, "Current Level: " + ballCount, new Vector2(20, 20), Color.Black);
-            _spriteBatch.DrawString(font, "Level up in: " + (int) ((lastMillis + 10000 - gameTime.TotalGameTime.TotalMilliseconds) / 1000.0 + 1), new Vector2(20, 40), Color.Black);
+            _spriteBatch.DrawString(font, "Current Level: " + ballCount, new Vector2(20, 20), Color.White);
+            _spriteBatch.DrawString(font, "Level up in: " + (int) ((lastMillis + 10000 - gameTime.TotalGameTime.TotalMilliseconds) / 1000.0 + 1), new Vector2(20, 40), Color.White);
             //_spriteBatch.DrawString(font, "Player X: " + player.bounds.X + "; Ball X: " + ((Ball)objects[objects.Count - 1]).bounds.X, new Vector2(20, 40), Color.Black);
             _spriteBatch.End();
+
+            
 
             base.Draw(gameTime);
         }
